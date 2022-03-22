@@ -2,8 +2,10 @@ using System.IO;
 using Coinbase.Repositories;
 using Coinbase.Services;
 using Coinbase.Exceptions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,11 +30,16 @@ namespace Coinbase
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string connectionString = Configuration.GetConnectionString("CoinbaseConnection");
+            services.AddDbContextPool<DatabaseContext>(options =>
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
             services.AddControllers();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "Coinbase", Version = "v1"}); });
 
             services.AddSingleton<ILoggerManager, LoggerManager>();
             services.AddScoped<ICryptocurrencyRepository, CryptoCurrencyRepository>();
+            services.AddAuthentication("ApiAuthenticationService")
+                .AddScheme<AuthenticationSchemeOptions, APIAuthenticationService>("APIAuthenticationService", null);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

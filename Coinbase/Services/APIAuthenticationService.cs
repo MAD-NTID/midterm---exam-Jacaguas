@@ -35,7 +35,14 @@ namespace Coinbase.Services
                 return AuthenticateResult.NoResult();
             
             //implement the authentication code here
-            
+            if (!Request.Headers.ContainsKey("Authorization"))
+                throw new UserErrorException("Authorization header required!", 401);
+            AuthenticationHeaderValue authorizationHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            string key = authorizationHeader.Parameter;
+
+            Authentication auth = await _repository.Authenticate(key);
+            if (auth == null)
+                throw new UserErrorException("Invalid Key", 401);
             //replace the two variable value with the correct info from the api repository
             string nameIdentifierApiKey = "";
             string userName = "";
