@@ -32,7 +32,7 @@ namespace Coinbase.Exceptions
             await context.Response.WriteAsync(errorString);
             if (exception is IUserErrorException)
             {
-                UserErrorException error = (UserErrorException)exception)
+                UserErrorException error = (UserErrorException)exception;
                 msg = error.GetMessage();
                 status = error.GetStatusCode();
 
